@@ -77,7 +77,7 @@ struct Options
 		pmIterations=argParser.TryGetArgmentNum("pmIterations" );
 
 		ndisp=argParser.TryGetArgmentNum("ndisp");
-		filterRadious=argParser.TryGetArgmentNum("filterRadious");
+		filterRadious=argParser.TryGetArgmentNum("filterRadius");
 		smooth_weight=argParser.TryGetArgmentNum("smooth_weight");
 		mc_threshold=argParser.TryGetArgmentNum("mc_threshold");
 	}
