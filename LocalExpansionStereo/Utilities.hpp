@@ -3,6 +3,8 @@
 #include <opencv2/core/core.hpp>
 #include <fstream>
 
+#define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),  (mode)))==NULL
+
 namespace cvutils
 {
 	namespace io
@@ -148,16 +150,16 @@ namespace cvutils
 			}
 			if (out.empty()) {
 				int s = 0;
-				ofs.write((const char*)(&s), sizeof(__int32));
+				ofs.write((const char*)(&s), sizeof(int));
 				return true;
 			}
-			__int32 rows = out.rows;
-			__int32 cols = out.cols;
-			__int32 type = out.type();
+			int rows = out.rows;
+			int cols = out.cols;
+			int type = out.type();
 
-			ofs.write((const char*)(&rows), sizeof(__int32));
-			ofs.write((const char*)(&cols), sizeof(__int32));
-			ofs.write((const char*)(&type), sizeof(__int32));
+			ofs.write((const char*)(&rows), sizeof(int));
+			ofs.write((const char*)(&cols), sizeof(int));
+			ofs.write((const char*)(&type), sizeof(int));
 			ofs.write((const char*)(out.data), out.elemSize() * out.total());
 
 			return true;
@@ -178,13 +180,13 @@ namespace cvutils
 
 			if (readHeader)
 			{
-				__int32 rows, cols, type;
-				ifs.read((char*)(&rows), sizeof(__int32));
+				int rows, cols, type;
+				ifs.read((char*)(&rows), sizeof(int));
 				if (rows == 0) {
 					return true;
 				}
-				ifs.read((char*)(&cols), sizeof(__int32));
-				ifs.read((char*)(&type), sizeof(__int32));
+				ifs.read((char*)(&cols), sizeof(int));
+				ifs.read((char*)(&type), sizeof(int));
 
 				in_mat.release();
 				in_mat.create(rows, cols, type);

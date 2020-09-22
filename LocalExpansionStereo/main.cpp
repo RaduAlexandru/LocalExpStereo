@@ -9,7 +9,15 @@
 #include "ArgsParser.h"
 #include "CostVolumeEnergy.h"
 #include "Utilities.hpp"
-#include <direct.h>
+// #include <direct.h>
+// #include <unistd.h>
+
+//boost
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
+
+
+#define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),  (mode)))==NULL
 
 struct Options
 {
@@ -30,24 +38,48 @@ struct Options
 
 	void loadOptionValues(ArgsParser& argParser)
 	{
-		argParser.TryGetArgment("outputDir", outputDir);
-		argParser.TryGetArgment("targetDir", targetDir);
-		argParser.TryGetArgment("mode", mode);
+		// argParser.TryGetArgment("outputDir", outputDir);
+		// argParser.TryGetArgment("targetDir", targetDir);
+		// argParser.TryGetArgment("mode", mode);
+
+		// if (mode == "MiddV2")
+		// 	smooth_weight = 1.0;
+		// else if (mode == "MiddV3")
+		// 	smooth_weight = 0.5;
+
+		// argParser.TryGetArgment("threadNum", threadNum);
+		// argParser.TryGetArgment("doDual", doDual);
+		// argParser.TryGetArgment("iterations", iterations);
+		// argParser.TryGetArgment("pmIterations", pmIterations);
+
+		// argParser.TryGetArgment("ndisp", ndisp);
+		// argParser.TryGetArgment("filterRadious", filterRadious);
+		// argParser.TryGetArgment("smooth_weight", smooth_weight);
+		// argParser.TryGetArgment("mc_threshold", mc_threshold);
+
+
+
+
+
+		// outputDir=(std::string)argParser.TryGetArgment<std::string>("outputDir");
+		outputDir=argParser.TryGetArgmentString("outputDir");
+		targetDir=argParser.TryGetArgmentString("targetDir" );
+		mode=argParser.TryGetArgmentString("mode");
 
 		if (mode == "MiddV2")
 			smooth_weight = 1.0;
 		else if (mode == "MiddV3")
 			smooth_weight = 0.5;
 
-		argParser.TryGetArgment("threadNum", threadNum);
-		argParser.TryGetArgment("doDual", doDual);
-		argParser.TryGetArgment("iterations", iterations);
-		argParser.TryGetArgment("pmIterations", pmIterations);
+		threadNum=argParser.TryGetArgmentNum("threadNum") ;
+		doDual=argParser.TryGetArgmentBool("doDual");
+		iterations=argParser.TryGetArgmentNum("iterations");
+		pmIterations=argParser.TryGetArgmentNum("pmIterations" );
 
-		argParser.TryGetArgment("ndisp", ndisp);
-		argParser.TryGetArgment("filterRadious", filterRadious);
-		argParser.TryGetArgment("smooth_weight", smooth_weight);
-		argParser.TryGetArgment("mc_threshold", mc_threshold);
+		ndisp=argParser.TryGetArgmentNum("ndisp");
+		filterRadious=argParser.TryGetArgmentNum("filterRadious");
+		smooth_weight=argParser.TryGetArgmentNum("smooth_weight");
+		mc_threshold=argParser.TryGetArgmentNum("mc_threshold");
 	}
 
 	void printOptionValues(FILE * out = stdout)
@@ -286,7 +318,7 @@ void MidV2(const std::string inputDir, const std::string outputDir, const Option
 	param.lambda = options.smooth_weight;
 
 	{
-		_mkdir((outputDir + "debug").c_str());
+		fs::create_directories((outputDir + "debug").c_str());
 
 		Evaluator *eval = new Evaluator(dispGT, nonocc, 255.0f / (maxdisp), "result", outputDir + "debug\\");
 		eval->setPrecision(calib.gt_prec);
@@ -307,9 +339,11 @@ void MidV2(const std::string inputDir, const std::string outputDir, const Option
 
 		cv::Mat labeling, rawdisp;
 		if (options.doDual)
-			stereo.run(options.iterations, { 0, 1 }, options.pmIterations, labeling, rawdisp);
+			// stereo.run(options.iterations, { 0, 1 }, options.pmIterations, labeling, rawdisp);
+			stereo.run(options.iterations, labeling, rawdisp, { 0, 1 }, options.pmIterations );
 		else
-			stereo.run(options.iterations, { 0 }, options.pmIterations, labeling, rawdisp);
+			// stereo.run(options.iterations, { 0 }, options.pmIterations, labeling, rawdisp);
+			stereo.run(options.iterations, labeling, rawdisp, { 0 }, options.pmIterations );
 
 		delete prop1;
 		delete prop2;
@@ -375,7 +409,7 @@ void MidV3(const std::string inputDir, const std::string outputDir, const Option
 
 
 	{
-		_mkdir((outputDir + "debug").c_str());
+		fs::create_directories((outputDir + "debug").c_str());
 
 		Evaluator *eval = new Evaluator(dispGT, nonocc, 255.0f / (maxdisp), "result", outputDir + "debug\\");
 		eval->setPrecision(-1);
@@ -398,9 +432,11 @@ void MidV3(const std::string inputDir, const std::string outputDir, const Option
 
 		cv::Mat labeling, rawdisp;
 		if (options.doDual)
-			stereo.run(options.iterations, { 0, 1 }, options.pmIterations, labeling, rawdisp);
+			// stereo.run(options.iterations, { 0, 1 }, options.pmIterations, labeling, rawdisp);
+			stereo.run(options.iterations, labeling, rawdisp, { 0, 1 }, options.pmIterations );
 		else
-			stereo.run(options.iterations, { 0 }, options.pmIterations, labeling, rawdisp);
+			// stereo.run(options.iterations, { 0 }, options.pmIterations, labeling, rawdisp);
+			stereo.run(options.iterations,  labeling, rawdisp, { 0 }, options.pmIterations );
 
 		delete prop1;
 		delete prop2;
@@ -453,7 +489,7 @@ int main(int argc, const char** args)
 		omp_set_num_threads(options.threadNum);
 
 	if (options.outputDir.length())
-		_mkdir((options.outputDir).c_str());
+		fs::create_directories((options.outputDir).c_str());
 
 	printf("\n\n");
 

@@ -301,27 +301,27 @@ public:
 	std::shared_ptr<IJointFilter> createSubregionFilter(const cv::Rect& rect) const override
 	{
 		auto filter = std::make_shared<FastGuidedImageFilter>();
-		filter->R = R;
-		filter->eps = eps;
+		filter->R = IJointFilter::R;
+		filter->eps = GuidedImageFilter<Type>::eps;
 
-		filter->I = I(rect);
-		filter->realI = realI(rect);
-		filter->mean_I_r = mean_I_r(rect);
-		filter->mean_I_g = mean_I_g(rect);
-		filter->mean_I_b = mean_I_b(rect);
+		filter->I = IJointFilter::I(rect);
+		filter->realI = GuidedImageFilter<Type>::realI(rect);
+		filter->mean_I_r = GuidedImageFilter<Type>::mean_I_r(rect);
+		filter->mean_I_g = GuidedImageFilter<Type>::mean_I_g(rect);
+		filter->mean_I_b = GuidedImageFilter<Type>::mean_I_b(rect);
 		filter->Ichannels.resize(3);
-		filter->Ichannels[0] = Ichannels[0](rect);
-		filter->Ichannels[1] = Ichannels[1](rect);
-		filter->Ichannels[2] = Ichannels[2](rect);
+		filter->Ichannels[0] = GuidedImageFilter<Type>::Ichannels[0](rect);
+		filter->Ichannels[1] = GuidedImageFilter<Type>::Ichannels[1](rect);
+		filter->Ichannels[2] = GuidedImageFilter<Type>::Ichannels[2](rect);
 
-		filter->invrr = invrr(rect);
-		filter->invrg = invrg(rect);
-		filter->invrb = invrb(rect);
-		filter->invgg = invgg(rect);
-		filter->invgb = invgb(rect);
-		filter->invbb = invbb(rect);
+		filter->invrr = GuidedImageFilter<Type>::invrr(rect);
+		filter->invrg = GuidedImageFilter<Type>::invrg(rect);
+		filter->invrb = GuidedImageFilter<Type>::invrb(rect);
+		filter->invgg = GuidedImageFilter<Type>::invgg(rect);
+		filter->invgb = GuidedImageFilter<Type>::invgb(rect);
+		filter->invbb = GuidedImageFilter<Type>::invbb(rect);
 
-		filter->N = boxfilter(cv::Mat_<Type>::ones(rect.size()));
+		filter->N = GuidedImageFilter<Type>::boxfilter(cv::Mat_<Type>::ones(rect.size()));
 		return filter;
 	}
 };
