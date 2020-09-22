@@ -321,7 +321,8 @@ void MidV2(const std::string inputDir, const std::string outputDir, const Option
 		fs::create_directories((outputDir + "debug").c_str());
 
 		Evaluator *eval = new Evaluator(dispGT, nonocc, 255.0f / (maxdisp), "result", outputDir + "debug\\");
-		eval->setPrecision(calib.gt_prec);
+		// eval->setPrecision(calib.gt_prec);
+		eval->setPrecision(-1);
 		eval->showProgress = false;
 		eval->setErrorThreshold(errorThresh);
 
@@ -329,13 +330,22 @@ void MidV2(const std::string inputDir, const std::string outputDir, const Option
 		stereo.saveDir = outputDir + "debug\\";
 		stereo.setEvaluator(eval);
 
+		// IProposer* prop1 = new ExpansionProposer(1);
+		// IProposer* prop2 = new RandomProposer(7, maxdisp);
+		// IProposer* prop3 = new ExpansionProposer(2);
+		// IProposer* prop4 = new RansacProposer(1);
+		// stereo.addLayer(5, { prop1, prop4, prop2 });
+		// stereo.addLayer(15, { prop3, prop4 });
+		// stereo.addLayer(25, { prop3, prop4 });
+
+		int w = imL.cols;
 		IProposer* prop1 = new ExpansionProposer(1);
 		IProposer* prop2 = new RandomProposer(7, maxdisp);
 		IProposer* prop3 = new ExpansionProposer(2);
 		IProposer* prop4 = new RansacProposer(1);
-		stereo.addLayer(5, { prop1, prop4, prop2 });
-		stereo.addLayer(15, { prop3, prop4 });
-		stereo.addLayer(25, { prop3, prop4 });
+		stereo.addLayer(int(w * 0.01), { prop1, prop4, prop2 });
+		stereo.addLayer(int(w * 0.03), { prop3, prop4 });
+		stereo.addLayer(int(w * 0.09), { prop3, prop4 });
 
 		cv::Mat labeling, rawdisp;
 		if (options.doDual)
@@ -349,6 +359,13 @@ void MidV2(const std::string inputDir, const std::string outputDir, const Option
 		delete prop2;
 		delete prop3;
 		delete prop4;
+
+
+		cv::Mat disp_mat=stereo.getEnergyInstance().computeDisparities(labeling);
+		cv::imwrite(outputDir+"/disp.png", disp_mat);
+		cv::Mat disp_raw_mat=stereo.getEnergyInstance().computeDisparities(rawdisp);
+		cv::imwrite(outputDir+"/disp_raw.png", disp_raw_mat);
+
 
 		cvutils::io::save_pfm_file(outputDir + "disp0.pfm", stereo.getEnergyInstance().computeDisparities(labeling));
 		if (options.doDual)
