@@ -362,6 +362,7 @@ void MidV2(const std::string inputDir, const std::string outputDir, const Option
 
 
 		cv::Mat disp_mat=stereo.getEnergyInstance().computeDisparities(labeling);
+		// disp_mat/=4;
 		cv::imwrite(outputDir+"/disp.png", disp_mat);
 		cv::Mat disp_raw_mat=stereo.getEnergyInstance().computeDisparities(rawdisp);
 		cv::imwrite(outputDir+"/disp_raw.png", disp_raw_mat);
